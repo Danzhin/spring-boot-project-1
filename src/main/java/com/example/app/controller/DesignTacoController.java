@@ -4,8 +4,10 @@ import com.example.app.model.Ingredient;
 import com.example.app.model.Ingredient.Type;
 import com.example.app.model.Taco;
 import com.example.app.model.TacoOrder;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,8 +40,7 @@ public class DesignTacoController {
         );
         Type[] types = Ingredient.Type.values();
         for (Type type : types) {
-            model.addAttribute(type.toString().toLowerCase(),
-                    filterByType(ingredients, type));
+            model.addAttribute(type.toString().toLowerCase(), filterByType(ingredients, type));
         }
     }
 
@@ -59,7 +60,10 @@ public class DesignTacoController {
     }
 
     @PostMapping
-    public String processTaco(Taco taco, @ModelAttribute TacoOrder tacoOrder) {
+    public String processTaco(@Valid Taco taco, Errors errors, @ModelAttribute TacoOrder tacoOrder) {
+        if (errors.hasErrors()) {
+            return "design";
+        }
         tacoOrder.addTaco(taco);
         log.info("Processing taco: {}", taco);
         return "redirect:/orders/current";
